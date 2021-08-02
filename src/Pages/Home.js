@@ -3,13 +3,36 @@ import { Text, View, Image, Switch } from 'react-native';
 import { useNetInfo } from "@react-native-community/netinfo";
 import Styled from '../assets/Styled'
 import Separator from '../components/Separator';
+import TimeList from '../components/TimeList';
+import Geolocation from 'react-native-geolocation-service';
 
 const Home = () => {
-
   const netInfo = useNetInfo()
   const [connection, setConnection] = useState({hasConnection: false, label: 'Offline'})
-  const [serviceSwitch, setServiceSwitch] = useState(false)
+  const [serviceSwitch, setServiceSwitch] = useState(true)
+  const [latitude, setLatitude] = useState()
+  const [longitude, setLongitude] = useState()
+  const [selectedInterval, setSelectedInterval] = useState(10000)
   const changeServiceSwitch = () => setServiceSwitch(!serviceSwitch)
+
+  const getMyPosition = Geolocation.getCurrentPosition(
+    (position) => {
+      const {latitude, longitude} = position
+      setLatitude(latitude)
+      setLongitude(longitude)
+    },
+    (err) => {
+        console.error(err);
+    }, 
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+  )
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+
+  //   }, selectedInterval)
+  //   return () => clearInterval(interval)
+  // }, [])
 
   const checkConnection = () => {
     setConnection({hasConnection: false, label: 'Offline'})
@@ -22,10 +45,10 @@ const Home = () => {
 
   return (
     <View style={Styled.container}>
-        <View style={Styled.welcomeBar}>
-          <Text style={{color: '#C9C9FE', fontSize: 20}}>Olá, bem-vindo</Text>
-          <Text style={{color: '#FEFEFF', fontSize: 20}}>Status</Text>
-        </View>
+      <View style={Styled.welcomeBar}>
+        <Text style={{color: '#C9C9FE', fontSize: 20}}>Olá, bem-vindo</Text>
+        <Text style={{color: '#FEFEFF', fontSize: 20}}>Status</Text>
+      </View>
       <View style={Styled.content}>
         <View style={Styled.connection}>
           <Image source={require('../assets/compass-icon-13553.png')} style={Styled.compassIcon} />
@@ -37,10 +60,10 @@ const Home = () => {
       </View>
       <Separator />
       <View style={Styled.content}>
-        <View> 
+        <View style={Styled.viewRow}> 
           <View>
-            <Text>Status do serviço</Text>
-            <Text>Serviço ativo</Text>
+            <Text style={Styled.contentTitle}>Status do serviço</Text>
+            {serviceSwitch ? <Text style={Styled.contentParagraph}>Serviço ativo</Text> : <Text style={Styled.contentParagraph}>Serviço inativo</Text>}
           </View>
           <Switch 
             trackColor={{false: '#babaca', true: '#E4E2EB'}} 
@@ -50,8 +73,9 @@ const Home = () => {
           />
         </View>
         <View>
-          <Text>Intervalo de comunicação</Text>
+          <Text style={Styled.contentTitle}>Intervalo de comunicação</Text>
           <View>
+            <TimeList selectedInterval={(data) => setSelectedInterval(data.value * 1000)} />
           </View>
         </View>
       </View>

@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-
+import { Dimensions, StyleSheet } from 'react-native';
+const {height, width} = Dimensions.get('window')
 const Styled = StyleSheet.create({
     container: {
       flex: 1,
@@ -35,9 +35,62 @@ const Styled = StyleSheet.create({
     },
 
     separator: {
-        width: '100%', 
+        width: width, 
         borderBottomWidth: 1,
         borderColor: '#DCE2E9'
+    },
+
+    timeListItemView: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 65,
+      width: 65,
+      borderWidth: 1,
+      borderColor: '#B5BDC4',
+      borderRadius: 5
+    },
+
+    timeListItemViewSelected: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 65,
+      width: 65,
+      borderWidth: 1,
+      borderColor: '#56BF12',
+      backgroundColor: '#EDF3F1',
+      borderRadius: 5
+    },
+
+    timeListItemTextSelected: {
+      fontSize: 20,
+      color: '#333F3B'
+    },
+
+    timeListItemText: {
+      fontSize: 20,
+      color: '#B5BDC4'
+    },
+
+    timeListView: {
+      alignSelf: 'center',
+      width: width - 41,
+      justifyContent: 'space-between',
+      marginTop: 20
+    },
+
+    viewRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: width - 40,
+      marginVertical: 30
+    },
+
+    contentParagraph: {
+      fontSize: 15
+    },
+
+    contentTitle: {
+      fontSize: 20
     },
   }
 );
