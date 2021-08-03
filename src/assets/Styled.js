@@ -11,7 +11,7 @@ const Styled = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      width: '100%',
+      width: width,
       height: 70,
       paddingHorizontal: 20,
     },
@@ -86,11 +86,27 @@ const Styled = StyleSheet.create({
     },
 
     contentParagraph: {
-      fontSize: 15
+      fontSize: 15,
+      color: '#333F3B'
     },
 
     contentTitle: {
-      fontSize: 20
+      fontSize: 20,
+      color: '#333F3B'
+    },
+
+    pressable: {
+      height: 55,
+      width: 55, 
+      justifyContent: 'center', 
+      alignItems: 'center'
+    },
+
+    nothingToSync: {
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      flex: 1, 
+      backgroundColor: '#F9F7FF'
     },
   }
 );

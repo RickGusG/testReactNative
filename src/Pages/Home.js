@@ -5,21 +5,75 @@ import Styled from '../assets/Styled'
 import Separator from '../components/Separator';
 import TimeList from '../components/TimeList';
 import Geolocation from 'react-native-geolocation-service';
+import NavigationBar from '../components/NavigationBar';
+import { format } from 'date-fns';
+import axios from 'axios';
+import PointsToSync from '../data/PointsToSync.json'
+import PointsStatus from '../data/PointsStatus.json'
 
 const Home = () => {
   const netInfo = useNetInfo()
   const [connection, setConnection] = useState({hasConnection: false, label: 'Offline'})
   const [serviceSwitch, setServiceSwitch] = useState(true)
-  const [latitude, setLatitude] = useState()
-  const [longitude, setLongitude] = useState()
   const [selectedInterval, setSelectedInterval] = useState(10000)
   const changeServiceSwitch = () => setServiceSwitch(!serviceSwitch)
 
-  const getMyPosition = Geolocation.getCurrentPosition(
+  const api = axios.create({
+    baseURL: 'http://localhost:8081/'
+  })
+
+  const getMyPosition = () => Geolocation.getCurrentPosition(
     (position) => {
-      const {latitude, longitude} = position
-      setLatitude(latitude)
-      setLongitude(longitude)
+      const {coords, timestamp} = position
+      const {latitude, longitude, speed} = coords
+      const time = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+      const packageID = format(new Date(), 'yyyyMMddHHmmss')
+
+      const pointToSend = {
+        id: timestamp.toString(),
+        latitude,
+        longitude,
+        speed,
+        time
+      }
+
+      const pointToSendWithStatus = {
+        id: timestamp.toString(),
+        latitude,
+        longitude,
+        speed,
+        time,
+        status: false
+      }
+
+      const sendPoint = async () => {
+        const res = await api.post(`points/${pointToSend.id}`, [pointToSend])
+        const {data} = res
+        return data
+      }
+
+      const sendPointsInLine = async () => {
+        const res = await api.post(`points/${packageID}`, PointsToSync)
+        const {data} = res
+        return data
+      }
+
+      if (connection.hasConnection) {
+        if (JSON.stringify(PointsToSync) !== '[]') {
+          sendPointsInLine()
+          PointsToSync.splice(0, PointsToSync.length)
+          PointsStatus.map(point => point.status = true)
+        }
+        if (serviceSwitch) sendPoint(); 
+        return
+      }
+
+      if (serviceSwitch && !connection.hasConnection) {
+        PointsToSync.push(pointToSend)
+        PointsStatus.push(pointToSendWithStatus)
+        return
+      }
+
     },
     (err) => {
         console.error(err);
@@ -27,12 +81,12 @@ const Home = () => {
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
   )
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-
-  //   }, selectedInterval)
-  //   return () => clearInterval(interval)
-  // }, [])
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getMyPosition()
+    }, selectedInterval)
+    return () => clearInterval(interval)
+  }, [selectedInterval, connection, serviceSwitch])
 
   const checkConnection = () => {
     setConnection({hasConnection: false, label: 'Offline'})
@@ -45,10 +99,7 @@ const Home = () => {
 
   return (
     <View style={Styled.container}>
-      <View style={Styled.welcomeBar}>
-        <Text style={{color: '#C9C9FE', fontSize: 20}}>Olá, bem-vindo</Text>
-        <Text style={{color: '#FEFEFF', fontSize: 20}}>Status</Text>
-      </View>
+      <NavigationBar isHome={true} text={'Olá, bem-vindo'} buttonText={'Status'} />
       <View style={Styled.content}>
         <View style={Styled.connection}>
           <Image source={require('../assets/compass-icon-13553.png')} style={Styled.compassIcon} />
@@ -58,7 +109,7 @@ const Home = () => {
           </View> 
         </View>
       </View>
-      <Separator />
+      <Separator full />
       <View style={Styled.content}>
         <View style={Styled.viewRow}> 
           <View>
